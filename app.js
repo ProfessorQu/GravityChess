@@ -150,7 +150,7 @@ function update_board_div() {
 
             if (board[x][y] != ' ') {
                 let color = playerPiece(board[x][y]);
-                cell_div.innerHTML = '<img src=images/' + color + '/' + board[x][y] + '.png />';
+                cell_div.innerHTML = '<img src=images/' + color + '/' + board[x][y].toLowerCase() + '.png />';
             } else {
                 cell_div.innerHTML = '';
             }
