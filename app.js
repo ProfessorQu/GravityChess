@@ -85,7 +85,9 @@ function move_piece(selected, target) {
 }
 
 function handle_click(event) {
+    console.log(event);
     let [target_y, target_x] = get_coords(event.target);
+    console.log(target_x, target_y);
     if (selected == null) {
         if (board[target_y][target_x] == ' ') {
             return
@@ -145,7 +147,13 @@ function update_board_div() {
     for (let x = 0; x < SIZE; x++) {
         for (let y = 0; y < SIZE; y++) {
             let cell_div = document.getElementById('cell-' + x + '-' + y);
-            cell_div.innerText = board[x][y];
+
+            if (board[x][y] != ' ') {
+                let color = playerPiece(board[x][y]);
+                cell_div.innerHTML = '<img src=images/' + color + '/' + board[x][y] + '.png />';
+            } else {
+                cell_div.innerHTML = '';
+            }
         }
     }
 }

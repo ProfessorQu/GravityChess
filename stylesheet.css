@@ -21,15 +21,21 @@ body {
     user-select: none;
 }
 
+.cell img {
+    width: var(--size);
+
+    pointer-events: none;
+}
+
 .selected {
     background-color: steelblue !important;
 }
 
 .white {
-    background-color: white;
+    background-color: gainsboro;
 }
 
 .black {
-    background-color: black;
+    background-color: gray;
     color: white;
 }
