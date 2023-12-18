@@ -1,0 +1,35 @@
+:root {
+    --size: 10vh;
+}
+
+body {
+    background-color: beige;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(8, var(--size));
+}
+
+.cell {
+    width: var(--size);
+    height: var(--size);
+
+    font-size: calc(var(--size) - 10px);
+    text-align: center;
+
+    user-select: none;
+}
+
+.selected {
+    background-color: steelblue !important;
+}
+
+.white {
+    background-color: white;
+}
+
+.black {
+    background-color: black;
+    color: white;
+}
