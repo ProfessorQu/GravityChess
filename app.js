@@ -4,10 +4,9 @@ const Players = Object.freeze({
 });
 
 const SIZE = 8;
+const EXCEPTIONS = ['p', 'k'];
 
 const board_div = document.getElementById('board');
-let selected = null;
-let turn = Players.White;
 
 let board = [
     ["R", "N", "B", "Q", "K", "B", "N", "R"],
@@ -19,6 +18,9 @@ let board = [
     ["p", "p", "p", "p", "p", "p", "p", "p"],
     ["r", "n", "b", "q", "k", "b", "n", "r"],
 ];
+
+let selected = null;
+let turn = Players.White;
 
 function switch_color(color) {
     if (color == Players.White) { return Players.Black }
@@ -39,8 +41,10 @@ function playerPiece(piece) {
     }
 }
 
-function gravity(piece, target_x, target_y) {
+function apply_gravity(target_x, target_y) {
+    let piece = board[target_y][target_x];
     let gravity_y = SIZE;
+
     if (playerPiece(piece) == Players.White) {
         for (let y = target_y; y < SIZE; y++) {
             if (y == target_y) {
@@ -63,20 +67,7 @@ function gravity(piece, target_x, target_y) {
         }
     }
 
-    return gravity_y;
-}
-
-function move_piece(selected, target) {
-    let [target_y, target_x] = get_coords(target);
-    let [selected_y, selected_x] = get_coords(selected);
-
-    let piece = board[selected_y][selected_x];
-
-    board[selected_y][selected_x] = ' ';
-
-    let gravity_y = gravity(piece, target_x, target_y);
-
-    if (SIZE > gravity_y && gravity_y >= 0 && piece.toLowerCase() != 'p') {
+    if (SIZE > gravity_y && gravity_y >= 0 && !EXCEPTIONS.includes(piece.toLowerCase())) {
         board[gravity_y][target_x] = piece;
         board[target_y][target_x] = ' ';
     } else {
@@ -84,10 +75,16 @@ function move_piece(selected, target) {
     }
 }
 
+function move_piece(selected, target) {
+    let [target_y, target_x] = get_coords(target);
+    let [selected_y, selected_x] = get_coords(selected);
+
+    board[target_y][target_x] = board[selected_y][selected_x];
+    board[selected_y][selected_x] = ' ';
+}
+
 function handle_click(event) {
-    console.log(event);
     let [target_y, target_x] = get_coords(event.target);
-    console.log(target_x, target_y);
     if (selected == null) {
         if (board[target_y][target_x] == ' ') {
             return
@@ -106,7 +103,9 @@ function handle_click(event) {
 
     move_piece(selected, event.target);
 
+    update_board();
     update_board_div();
+
     if (turn == Players.White) {
         turn = Players.Black;
     } else {
@@ -140,6 +139,18 @@ function create_board_div() {
         }
 
         color = switch_color(color);
+    }
+}
+
+function update_board() {
+    for (let x = 0; x < SIZE; x++) {
+        for (let y = 0; y < SIZE; y++) {
+            apply_gravity(x, y);
+        }
+
+        for (let y = SIZE - 1; y >= 0; y--) {
+            apply_gravity(x, y);
+        }
     }
 }
 
