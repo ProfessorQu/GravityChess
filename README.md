@@ -1,1 +1,1 @@
-# ChessVariants
+# GravityChess
