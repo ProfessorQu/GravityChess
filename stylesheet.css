@@ -44,6 +44,10 @@ body {
     background-color: steelblue !important;
 }
 
+.possible {
+    background-color: aquamarine !important;
+}
+
 .white {
     background-color: gainsboro;
 }

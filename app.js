@@ -33,7 +33,7 @@ function get_coords(cell) {
     return [Number(split[1]), Number(split[2])];
 }
 
-function playerPiece(piece) {
+function pieceOfPlayer(piece) {
     if (piece.toLowerCase() == piece) {
         return Players.White;
     } else {
@@ -45,7 +45,7 @@ function apply_gravity(target_x, target_y) {
     let piece = board[target_y][target_x];
     let gravity_y = SIZE;
 
-    if (playerPiece(piece) == Players.White) {
+    if (pieceOfPlayer(piece) == Players.White) {
         for (let y = target_y; y < SIZE; y++) {
             if (y == target_y) {
                 continue
@@ -83,19 +83,74 @@ function move_piece(selected, target) {
     board[selected_y][selected_x] = ' ';
 }
 
+function get_moves(piece_x, piece_y) {
+    let piece = board[piece_y][piece_x];
+
+    if (piece.toLowerCase() == 'p') {
+        if (pieceOfPlayer(piece) == Players.White) {
+            return [{
+                x: piece_x,
+                y: piece_y - 1
+            }];
+        } else {
+            return [{
+                x: piece_x,
+                y: piece_y + 1
+            }];
+        }
+    } else if (piece.toLowerCase() == 'b') {
+        let moves = [];
+
+        for (let move_x = 0; move_x < SIZE; move_x++) {
+            for (let move_y = 0; move_y < SIZE; move_y++) {
+                if (Math.abs(move_x - piece_x) != Math.abs(move_y - piece_y)) {
+                    continue
+                }
+
+                if (board[move_y][move_x] != ' ' && pieceOfPlayer(board[move_y][move_x]) == turn) {
+                    break
+                }
+
+                if (move_x == piece_x && move_y == piece_y) {
+                    continue
+                }
+
+                moves.push({
+                    x: move_x,
+                    y: move_y
+                });
+            }
+        }
+
+        return moves;
+    } else {
+        return [];
+    }
+}
+
 function handle_click(event) {
+    reset_board();
+
     let [target_y, target_x] = get_coords(event.target);
+
     if (selected == null) {
         if (board[target_y][target_x] == ' ') {
             return
         }
 
-        if (playerPiece(board[target_y][target_x]) != turn) {
+        if (pieceOfPlayer(board[target_y][target_x]) != turn) {
             return
         }
 
         event.target.classList.add('selected');
         selected = event.target;
+
+        let moves = get_moves(target_x, target_y);
+        moves.forEach(move => {
+            let cell = document.getElementById('cell-' + move.y + '-' + move.x);
+            cell.classList.add('possible');
+        });
+
         return
     }
 
@@ -108,7 +163,7 @@ function handle_click(event) {
 
     let target = board[target_y][target_x];
 
-    if (target != ' ' && playerPiece(board[target_y][target_x]) == turn) {
+    if (target != ' ' && pieceOfPlayer(board[target_y][target_x]) == turn) {
         selected = null;
         return
     }
@@ -154,6 +209,16 @@ function create_board_div() {
     }
 }
 
+function reset_board() {
+    for (let x = 0; x < SIZE; x++) {
+        for (let y = 0; y < SIZE; y++) {
+            let cell_div = document.getElementById('cell-' + x + '-' + y);
+
+            cell_div.classList.remove('possible');
+        }
+    }
+}
+
 function update_board() {
     for (let x = 0; x < SIZE; x++) {
         for (let y = 0; y < SIZE; y++) {
@@ -172,7 +237,7 @@ function update_board_div() {
             let cell_div = document.getElementById('cell-' + x + '-' + y);
 
             if (board[x][y] != ' ') {
-                let color = playerPiece(board[x][y]);
+                let color = pieceOfPlayer(board[x][y]);
                 cell_div.innerHTML = '<img src=images/' + color + '/' + board[x][y].toLowerCase() + '.png />';
             } else {
                 cell_div.innerHTML = '';
