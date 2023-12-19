@@ -101,6 +101,18 @@ function handle_click(event) {
 
     selected.classList.remove('selected');
 
+    if (selected == event.target) {
+        selected = null;
+        return
+    }
+
+    let target = board[target_y][target_x];
+
+    if (target != ' ' && playerPiece(board[target_y][target_x]) == turn) {
+        selected = null;
+        return
+    }
+
     move_piece(selected, event.target);
 
     update_board();
