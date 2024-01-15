@@ -6,7 +6,7 @@ const Players = Object.freeze({
 const SIZE = 8;
 const EXCEPTIONS = ['p', 'k'];
 
-const board_div = document.getElementById('board');
+const boardDiv = document.getElementById('board');
 
 let board = [
     ["R", "N", "B", "Q", "K", "B", "N", "R"],
@@ -19,15 +19,17 @@ let board = [
     ["r", "n", "b", "q", "k", "b", "n", "r"],
 ];
 
+let boardHistory = [];
+
 let selected = null;
 let turn = Players.White;
 
-function switch_color(color) {
+function switchColor(color) {
     if (color == Players.White) { return Players.Black }
     else { return Players.White }
 }
 
-function get_coords(cell) {
+function getCoords(cell) {
     let split = cell.id.split("-");
 
     return [Number(split[1]), Number(split[2])];
@@ -41,7 +43,7 @@ function pieceOfPlayer(piece) {
     }
 }
 
-function apply_gravity(target_x, target_y) {
+function applyGravity(target_x, target_y) {
     let piece = board[target_y][target_x];
     let gravity_y = SIZE;
 
@@ -75,16 +77,21 @@ function apply_gravity(target_x, target_y) {
     }
 }
 
-function move_piece(selected, target) {
-    let [target_y, target_x] = get_coords(target);
-    let [selected_y, selected_x] = get_coords(selected);
+function movePiece(selected, target) {
+    let boardCopy = board.map(arr => {
+        return arr.slice();
+    });
+    boardHistory.push([turn, boardCopy]);
+
+    let [target_y, target_x] = getCoords(target);
+    let [selected_y, selected_x] = getCoords(selected);
 
     board[target_y][target_x] = board[selected_y][selected_x];
     board[selected_y][selected_x] = ' ';
 }
 
-function handle_click(event) {
-    let [target_y, target_x] = get_coords(event.target);
+function handleClick(event) {
+    let [target_y, target_x] = getCoords(event.target);
 
     if (selected == null) {
         if (board[target_y][target_x] == ' ') {
@@ -102,23 +109,21 @@ function handle_click(event) {
     }
 
     selected.classList.remove('selected');
-
     if (selected == event.target) {
         selected = null;
         return
     }
 
     let target = board[target_y][target_x];
-
     if (target != ' ' && pieceOfPlayer(board[target_y][target_x]) == turn) {
         selected = null;
         return
     }
 
-    move_piece(selected, event.target);
+    movePiece(selected, event.target);
 
-    update_board();
-    update_board_div();
+    updateBoard();
+    updateBoardDiv();
 
     if (turn == Players.White) {
         turn = Players.Black;
@@ -129,8 +134,17 @@ function handle_click(event) {
     selected = null;
 }
 
-function create_board_div() {
-    if (board_div == null) {
+function undo(event) {
+    if (boardHistory.length == 0) {
+        return;
+    }
+
+    [turn, board] = boardHistory.pop();
+    updateBoardDiv();
+}
+
+function createBoardDiv() {
+    if (boardDiv == null) {
         return;
     }
 
@@ -139,36 +153,38 @@ function create_board_div() {
     for (let y = 0; y < SIZE; y++) {
         for (let x = 0; x < SIZE; x++) {
             let cell_div = document.createElement('div');
-
             cell_div.classList.add('cell');
             cell_div.classList.add(color);
 
             cell_div.id = 'cell-' + y + '-' + x;
+            cell_div.addEventListener('click', handleClick);
+            boardDiv.appendChild(cell_div);
 
-            cell_div.addEventListener('click', handle_click);
-
-            board_div.appendChild(cell_div);
-
-            color = switch_color(color);
+            color = switchColor(color);
         }
 
-        color = switch_color(color);
+        color = switchColor(color);
     }
+
+    let undoButton = document.getElementById("undo");
+    undoButton.addEventListener('click', undo)
+
+    boardDiv.appendChild(undoButton);
 }
 
-function update_board() {
+function updateBoard() {
     for (let x = 0; x < SIZE; x++) {
         for (let y = 0; y < SIZE; y++) {
-            apply_gravity(x, y);
+            applyGravity(x, y);
         }
 
         for (let y = SIZE - 1; y >= 0; y--) {
-            apply_gravity(x, y);
+            applyGravity(x, y);
         }
     }
 }
 
-function update_board_div() {
+function updateBoardDiv() {
     for (let x = 0; x < SIZE; x++) {
         for (let y = 0; y < SIZE; y++) {
             let cell_div = document.getElementById('cell-' + x + '-' + y);
@@ -183,5 +199,5 @@ function update_board_div() {
     }
 }
 
-create_board_div();
-update_board_div();
+createBoardDiv();
+updateBoardDiv();

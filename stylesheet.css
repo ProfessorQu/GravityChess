@@ -24,6 +24,20 @@ body {
     list-style-position: inside;
 }
 
+#undo {
+    border: none;
+    background: none;
+    float: left;
+}
+
+#undo:hover {
+    cursor: pointer;
+}
+
+#undo img {
+    width: 5em;
+}
+
 .cell {
     width: var(--size);
     height: var(--size);
